@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recherche d'Emplois & Micro-missions au Cameroun - WorkCamer</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <style>
+    .job-details-modal {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .job-details-modal h3 {
+      font-size: 1.8rem;
+      font-weight: 800;
+    }
+    .modal-budget {
+      color: var(--primary);
+      font-size: 1.5rem;
+      font-weight: 800;
+    }
+    .modal-meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      border-top: 1px solid var(--border-glass);
+      border-bottom: 1px solid var(--border-glass);
+      padding: 1rem 0;
+    }
+    .meta-item {
+      display: flex;
+      flex-direction: column;
+    }
+    .meta-item span:first-child {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .meta-item span:last-child {
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="/index.html" class="logo">
+      WorkCamer <span class="logo-star">★</span>
+    </a>
+    <ul class="nav-links" id="nav-links">
+      <!-- Rempli par common.js -->
+    </ul>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="search-banner">
+    <h1>Trouvez des <span>Micro-Missions</span> et Emplois de Confiance</h1>
+    <p>La première plateforme camerounaise sécurisée par contrôle biométrique et géolocalisation.</p>
+  </section>
+
+  <!-- Main Search Area -->
+  <main class="hero-search">
+    <div class="search-container">
+      
+      <!-- FILTRES DE RECHERCHE -->
+      <aside class="glass-panel filter-panel">
+        <div class="filter-title">
+          <span>Filtres de recherche</span>
+          <span style="font-size: 0.8rem; cursor: pointer; color: var(--primary);" onclick="resetFilters()">Réinitialiser</span>
+        </div>
+
+        <form id="filters-form">
+          <div class="form-group">
+            <label for="filter-ville">Ville</label>
+            <select id="filter-ville" class="form-control" onchange="applyFilters()">
+              <option value="">Toutes les villes</option>
+              <option value="Douala">Douala</option>
+              <option value="Yaoundé">Yaoundé</option>
+              <option value="Bafoussam">Bafoussam</option>
+              <option value="Garoua">Garoua</option>
+              <option value="Bamenda">Bamenda</option>
+              <option value="Buea">Buea</option>
+              <option value="Limbe">Limbe</option>
+              <option value="Kribi">Kribi</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="filter-quartier">Quartier</label>
+            <input type="text" id="filter-quartier" class="form-control" placeholder="Ex: Bastos, Akwa..." oninput="applyFilters()">
+          </div>
+
+          <div class="form-group">
+            <label for="filter-type">Type de contrat</label>
+            <select id="filter-type" class="form-control" onchange="applyFilters()">
+              <option value="">Tous les types</option>
+              <option value="Micro-mission">Micro-mission</option>
+              <option value="Court terme">Court terme</option>
+              <option value="Long terme">Long terme</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="filter-domaine">Domaine d'activité</label>
+            <select id="filter-domaine" class="form-control" onchange="applyFilters()">
+              <option value="">Tous les domaines</option>
+              <option value="Informatique & Dev">Informatique & Dev</option>
+              <option value="Enseignement & Soutien">Enseignement & Soutien</option>
+              <option value="Bâtiment & BTP">Bâtiment & BTP</option>
+              <option value="Commerce & Vente">Commerce & Vente</option>
+              <option value="Ménage & Services">Ménage & Services</option>
+              <option value="Transport & Logistique">Transport & Logistique</option>
+              <option value="Restauration & Cuisine">Restauration & Cuisine</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Budget en CFA (XAF)</label>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <input type="number" id="filter-budget-min" class="form-control" placeholder="Min" oninput="applyFilters()">
+              <span style="color: var(--text-muted);">à</span>
+              <input type="number" id="filter-budget-max" class="form-control" placeholder="Max" oninput="applyFilters()">
+            </div>
+          </div>
+        </form>
+      </aside>
+
+      <!-- RÉSULTATS DES OFFRES -->
+      <section>
+        <div class="form-group" style="position: relative; margin-bottom: 2rem;">
+          <input type="text" id="search-keyword" class="form-control" style="padding: 1rem 1.5rem 1rem 3rem; font-size: 1.1rem; border-radius: var(--radius-lg);" placeholder="Rechercher par mot-clé (ex: électricien, développeur node, nounou...)" oninput="applyFilters()">
+          <span style="position: absolute; left: 1.25rem; top: 1.15rem; font-size: 1.2rem; color: var(--text-muted);">🔍</span>
+        </div>
+
+        <div id="job-list" class="job-grid">
+          <!-- Chargé dynamiquement via JavaScript -->
+        </div>
+
+        <div id="no-jobs" style="display: none; text-align: center; padding: 4rem 2rem;" class="glass-panel">
+          <span style="font-size: 3rem; display: block; margin-bottom: 1rem;">💼</span>
+          <h3>Aucune offre ne correspond à vos critères</h3>
+          <p style="color: var(--text-secondary); margin-top: 0.5rem;">Essayez d'élargir votre zone géographique ou de modifier les budgets.</p>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- MODAL DE DÉTAIL D'OFFRE & CANDIDATURE -->
+  <div id="job-modal" class="modal-overlay" onclick="closeJobModal(event)">
+    <div class="glass-panel modal-content" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeJobModal()">&times;</button>
+      
+      <div class="job-details-modal">
+        <div>
+          <span id="modal-job-type" class="type-badge">...</span>
+          <h3 id="modal-job-title">Titre de l'offre</h3>
+        </div>
+
+        <div class="modal-budget" id="modal-job-budget">0 XAF</div>
+
+        <p id="modal-job-desc" style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6;">
+          Description détaillée de la mission...
+        </p>
+
+        <div class="modal-meta-grid">
+          <div class="meta-item">
+            <span>Domaine</span>
+            <span id="modal-job-domaine">...</span>
+          </div>
+          <div class="meta-item">
+            <span>Localisation</span>
+            <span id="modal-job-loc">...</span>
+          </div>
+          <div class="meta-item">
+            <span>Publié par</span>
+            <span id="modal-job-author">...</span>
+          </div>
+          <div class="meta-item">
+            <span>Vérification Auteur</span>
+            <span id="modal-job-author-cni">...</span>
+          </div>
+        </div>
+
+        <!-- ZONE DE CANDIDATURE -->
+        <div id="application-block" style="margin-top: 1rem;">
+          <!-- Injecté dynamiquement selon le statut de connexion -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/common.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>
