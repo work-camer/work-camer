@@ -104,7 +104,8 @@ function updateNavbar() {
     }
 
     navLinks.innerHTML = `
-      <li><a href="/index.html" class="nav-link ${isActive('/index.html')}">Accueil Portal</a></li>
+      <li><a href="/index.html" class="nav-link ${isActive('/index.html')}">Accueil</a></li>
+      <li><a href="/recherche.html" class="nav-link ${isActive('/recherche.html')}">Emplois en Live</a></li>
       <li><a href="/dashboard.html" class="nav-link ${isActive('/dashboard.html')}">Tableau de bord</a></li>
       <li><a href="/chat.html" class="nav-link ${isActive('/chat.html')}">Discussions</a></li>
       <li>
@@ -120,7 +121,8 @@ function updateNavbar() {
     `;
   } else {
     navLinks.innerHTML = `
-      <li><a href="/index.html" class="nav-link ${isActive('/index.html')}">Accueil Portal</a></li>
+      <li><a href="/index.html" class="nav-link ${isActive('/index.html')}">Accueil</a></li>
+      <li><a href="/recherche.html" class="nav-link ${isActive('/recherche.html')}">Emplois en Live</a></li>
       <li><a href="/auth.html?mode=register" class="nav-link ${isActive('/auth.html')}">Commencer</a></li>
       <li><a href="/auth.html" class="btn btn-secondary" style="padding:0.4rem 0.9rem;font-size:0.85rem">Connexion</a></li>
       <li><a href="/auth.html?mode=register" class="btn btn-primary" style="padding:0.4rem 0.9rem;font-size:0.85rem">S'inscrire</a></li>

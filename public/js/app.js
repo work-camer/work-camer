@@ -160,6 +160,11 @@ function openJobModal(jobId) {
   } else {
     // Connecté + CNI Validé + Pas l'auteur
     appBlock.innerHTML = `
+      <div style="display:flex; justify-content:center; margin-bottom:1.5rem;">
+        <button class="btn btn-secondary" style="width:100%; border-color: var(--primary);" onclick="window.location.href='/chat.html?contact=${job.auteur._id}'">
+          💬 Contacter le recruteur
+        </button>
+      </div>
       <form id="apply-form" onsubmit="submitApplication(event)">
         <div class="form-group">
           <label for="motivation-input">Message de motivation (Vos compétences, disponibilités, etc.)</label>

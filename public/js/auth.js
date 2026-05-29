@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (user.cniStatus !== 'Verified') {
       showCniScreen();
     } else {
-      window.location.href = '/dashboard.html';
+      window.location.href = '/index.html';
     }
   } else if (mode === 'register') {
     toggleMode('register');
@@ -76,7 +76,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
       if (data.user.cniStatus !== 'Verified') {
         showCniScreen();
       } else {
-      window.location.href = '/dashboard.html';
+      window.location.href = '/index.html';
       }
     }, 1000);
   } catch (error) {
