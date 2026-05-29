@@ -102,7 +102,7 @@ function updateNavbar() {
     } else {
       cniHtml = `<span class="cni-badge not-submitted" style="font-size:0.7rem;padding:0.2rem 0.5rem">CNI NON SOUMIS</span>`;
     }
-
+  
     navLinks.innerHTML = `
       <li><a href="/index.html" class="nav-link ${isActive('/index.html')}">Accueil</a></li>
       <li><a href="/recherche.html" class="nav-link ${isActive('/recherche.html')}">Emplois en Live</a></li>
@@ -123,8 +123,6 @@ function updateNavbar() {
     navLinks.innerHTML = `
       <li><a href="/index.html" class="nav-link ${isActive('/index.html')}">Accueil</a></li>
       <li><a href="/recherche.html" class="nav-link ${isActive('/recherche.html')}">Emplois en Live</a></li>
-      <li><a href="/auth.html?mode=register" class="nav-link ${isActive('/auth.html')}">Commencer</a></li>
-      <li><a href="/auth.html" class="btn btn-secondary" style="padding:0.4rem 0.9rem;font-size:0.85rem">Connexion</a></li>
       <li><a href="/auth.html?mode=register" class="btn btn-primary" style="padding:0.4rem 0.9rem;font-size:0.85rem">S'inscrire</a></li>
     `;
   }
