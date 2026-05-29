@@ -127,3 +127,37 @@ exports.getMyOffers = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// @desc    Mettre à jour le statut d'une offre d'emploi
+// @route   PUT /api/jobs/:id/status
+// @access  Private
+exports.updateJobStatus = async (req, res) => {
+  try {
+    const { statut } = req.body; // 'Ouvert', 'En cours', 'Clôturé'
+    
+    if (!['Ouvert', 'En cours', 'Clôturé'].includes(statut)) {
+      return res.status(400).json({ success: false, message: 'Statut de job invalide' });
+    }
+
+    const job = await Job.findById(req.params.id);
+    if (!job) {
+      return res.status(404).json({ success: false, message: 'Offre d\'emploi introuvable' });
+    }
+
+    // Vérifier si l'utilisateur est bien l'auteur du job
+    if (job.auteur.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Non autorisé à modifier cette offre' });
+    }
+
+    job.statut = statut;
+    await job.save();
+
+    res.status(200).json({
+      success: true,
+      message: `Statut de l'offre mis à jour à : ${statut}`,
+      job
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

@@ -99,7 +99,8 @@ function updateNavbar() {
     }
 
     navLinks.innerHTML = `
-      <li><a href="/index.html" class="nav-link">Rechercher</a></li>
+      <li><a href="/index.html" class="nav-link">Accueil</a></li>
+      <li><a href="/recherche.html" class="nav-link" style="display: flex; align-items: center; gap: 4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary);"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Commencer</a></li>
       ${dashboardLink}
       <li><a href="/chat.html" class="nav-link">Discussions</a></li>
       <li style="display: flex; align-items: center; gap: 8px;">
@@ -110,7 +111,8 @@ function updateNavbar() {
     `;
   } else {
     navLinks.innerHTML = `
-      <li><a href="/index.html" class="nav-link">Rechercher</a></li>
+      <li><a href="/index.html" class="nav-link">Accueil</a></li>
+      <li><a href="/recherche.html" class="nav-link" style="display: flex; align-items: center; gap: 4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary);"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Commencer</a></li>
       <li><a href="/auth.html" class="btn btn-secondary">Connexion</a></li>
       <li><a href="/auth.html?mode=register" class="btn btn-primary">S'inscrire</a></li>
     `;

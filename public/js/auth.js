@@ -24,15 +24,24 @@ function toggleMode(mode) {
   const loginBox = document.getElementById('login-container');
   const registerBox = document.getElementById('register-container');
   const cniBox = document.getElementById('cni-verification-container');
+  const tabLogin = document.getElementById('tab-login');
+  const tabRegister = document.getElementById('tab-register');
+  const authTabs = document.getElementById('auth-selector-tabs');
   
   cniBox.style.display = 'none';
 
   if (mode === 'register') {
     loginBox.style.display = 'none';
     registerBox.style.display = 'block';
+    if (tabLogin) tabLogin.classList.remove('active');
+    if (tabRegister) tabRegister.classList.add('active');
+    if (authTabs) authTabs.style.display = 'flex';
   } else {
     loginBox.style.display = 'block';
     registerBox.style.display = 'none';
+    if (tabLogin) tabLogin.classList.add('active');
+    if (tabRegister) tabRegister.classList.remove('active');
+    if (authTabs) authTabs.style.display = 'flex';
   }
 }
 
@@ -41,6 +50,8 @@ function showCniScreen() {
   document.getElementById('login-container').style.display = 'none';
   document.getElementById('register-container').style.display = 'none';
   document.getElementById('cni-verification-container').style.display = 'block';
+  const authTabs = document.getElementById('auth-selector-tabs');
+  if (authTabs) authTabs.style.display = 'none';
 }
 
 // Formulaire de Connexion

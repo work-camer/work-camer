@@ -107,6 +107,11 @@ exports.updateApplicationStatus = async (req, res) => {
     application.statut = statut;
     await application.save();
 
+    // Si accepté, marquer automatiquement l'offre comme "En cours"
+    if (statut === 'Accepté') {
+      await Job.findByIdAndUpdate(application.job._id, { statut: 'En cours' });
+    }
+
     res.status(200).json({
       success: true,
       message: `Candidature ${statut.toLowerCase()} avec succès`,

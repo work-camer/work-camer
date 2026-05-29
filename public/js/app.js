@@ -3,7 +3,18 @@ let selectedJobId = null;
 
 // Charger les offres au chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
-  loadJobs();
+  const urlParams = new URLSearchParams(window.location.search);
+  const domaineParam = urlParams.get('domaine');
+  
+  if (domaineParam) {
+    const selectDomaine = document.getElementById('filter-domaine');
+    if (selectDomaine) {
+      selectDomaine.value = domaineParam;
+    }
+    applyFilters();
+  } else {
+    loadJobs();
+  }
 });
 
 // Appeler l'API pour récupérer les jobs avec filtres
@@ -27,23 +38,36 @@ async function loadJobs(queryString = '') {
 
     jobsData.forEach(job => {
       const card = document.createElement('div');
-      card.className = 'glass-panel job-card';
+      let typeClass = 'type-micro';
+      if (job.type === 'Court terme') typeClass = 'type-court';
+      if (job.type === 'Long terme') typeClass = 'type-long';
+      
+      card.className = `glass-panel premium-job-card ${typeClass}`;
       card.onclick = () => openJobModal(job._id);
 
       // Formater le budget
       const formattedBudget = new Intl.NumberFormat('fr-FR').format(job.budget) + ' XAF';
 
       card.innerHTML = `
-        <span class="type-badge">${job.type}</span>
-        <div class="budget-tag">${formattedBudget}</div>
-        <h3 style="margin-top: 0.5rem;">${job.titre}</h3>
-        <p style="font-size: 0.85rem; color: var(--primary); font-weight: 600; margin-bottom: 0.75rem;">${job.domaine}</p>
-        <p class="description">${job.description}</p>
-        <div class="meta">
-          <div class="author">
-            👤 <span>${job.auteur.prenom} ${job.auteur.nom[0]}.</span>
+        <div class="job-card-header">
+          <div>
+            <span class="type-badge" style="margin-bottom: 0.5rem; display: inline-block;">${job.type}</span>
+            <h3 class="job-card-title">${job.titre}</h3>
+            <p style="font-size: 0.85rem; color: var(--primary); font-weight: 600; margin: 0.25rem 0 0;">${job.domaine}</p>
           </div>
-          <div>📍 ${job.localisation.quartier}, ${job.localisation.ville}</div>
+          <div class="budget-tag" style="position: static; font-weight: 800; font-size: 1.1rem; color: var(--primary);">${formattedBudget}</div>
+        </div>
+        <p class="job-card-desc">${job.description}</p>
+        <div class="job-card-footer">
+          <div class="job-card-meta-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-user" style="color: var(--text-muted);"><path d="M20 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle></svg>
+            <span>Publié par ${job.auteur.prenom} ${job.auteur.nom[0]}.</span>
+            ${job.auteur.cniStatus === 'Verified' ? '<span class="cni-badge verified" style="font-size: 0.65rem; padding: 0.1rem 0.4rem; margin-left: 4px;">CNI OK</span>' : ''}
+          </div>
+          <div class="job-card-meta-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-map-pin" style="color: var(--text-muted);"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+            <span>${job.localisation.quartier}, ${job.localisation.ville}</span>
+          </div>
         </div>
       `;
 
