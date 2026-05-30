@@ -20,48 +20,52 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Basculer l'affichage Connexion / Inscription
+let _currentMode = 'login';
+
 function toggleMode(mode) {
+  if (mode === _currentMode) return;
+  const prev = _currentMode;
+  _currentMode = mode;
+
   const loginBox    = document.getElementById('login-container');
   const registerBox = document.getElementById('register-container');
   const cniBox      = document.getElementById('cni-verification-container');
   const tabLogin    = document.getElementById('tab-login');
   const tabRegister = document.getElementById('tab-register');
+  const pill        = document.getElementById('tab-pill');
 
   cniBox.style.display = 'none';
 
-  // Mettre à jour les onglets actifs
+  // Déplacer la pill indicatrice
+  if (pill) {
+    pill.classList.toggle('right', mode === 'register');
+  }
+
+  // Mettre à jour les classes des onglets
   if (tabLogin)    tabLogin.classList.toggle('active', mode === 'login');
   if (tabRegister) tabRegister.classList.toggle('active', mode === 'register');
 
   const incoming = mode === 'register' ? registerBox : loginBox;
   const outgoing  = mode === 'register' ? loginBox    : registerBox;
+  const inClass   = mode === 'register' ? 'slide-in-right' : 'slide-in-left';
 
-  if (outgoing.style.display !== 'none') {
-    outgoing.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
-    outgoing.style.opacity    = '0';
-    outgoing.style.transform  = mode === 'register' ? 'translateX(-18px)' : 'translateX(18px)';
-    setTimeout(() => {
-      outgoing.style.display   = 'none';
-      outgoing.style.opacity   = '';
-      outgoing.style.transform = '';
-      incoming.style.display   = 'block';
-      incoming.style.opacity   = '0';
-      incoming.style.transform = mode === 'register' ? 'translateX(18px)' : 'translateX(-18px)';
-      requestAnimationFrame(() => {
-        incoming.style.transition = 'opacity 0.22s ease, transform 0.22s ease';
-        incoming.style.opacity    = '1';
-        incoming.style.transform  = 'translateX(0)';
-        setTimeout(() => {
-          incoming.style.transition = '';
-          incoming.style.opacity    = '';
-          incoming.style.transform  = '';
-        }, 220);
-      });
-    }, 180);
-  } else {
-    outgoing.style.display  = 'none';
-    incoming.style.display  = 'block';
-  }
+  // Fade-out sortant
+  outgoing.style.transition  = 'opacity 0.15s ease, transform 0.15s ease';
+  outgoing.style.opacity     = '0';
+  outgoing.style.transform   = mode === 'register' ? 'translateX(-16px)' : 'translateX(16px)';
+
+  setTimeout(() => {
+    outgoing.style.display    = 'none';
+    outgoing.style.opacity    = '';
+    outgoing.style.transform  = '';
+    outgoing.style.transition = '';
+
+    // Fade-in entrant avec classe CSS
+    incoming.style.display = 'block';
+    incoming.classList.remove('slide-in-left', 'slide-in-right');
+    void incoming.offsetWidth; // force reflow
+    incoming.classList.add(inClass);
+  }, 150);
 }
 
 // Afficher l'écran de validation CNI
@@ -141,103 +145,38 @@ let imagesBase64 = {
   selfie: null
 };
 
-// --- CAMÉRA FRONTALE POUR SELFIE ---
-
-let selfieStream = null;
-
-async function openFrontCamera() {
-  const btn = document.getElementById('btn-open-camera');
-  const captureBtn = document.getElementById('btn-capture-selfie');
-  const cameraView = document.getElementById('selfie-camera-view');
-  const video = document.getElementById('selfie-video');
-
-  btn.disabled = true;
-  btn.innerText = 'Activation...';
-
-  try {
-    selfieStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
-      audio: false
-    });
-    video.srcObject = selfieStream;
-    cameraView.style.display = 'block';
-    btn.style.display = 'none';
-    captureBtn.style.display = 'flex';
-    showToast('Caméra frontale activée !', 'success');
-  } catch (err) {
-    console.error('Caméra refusée:', err);
-    btn.disabled = false;
-    btn.innerText = 'Activer Caméra Frontale';
-    showToast('Accès caméra refusé. Vérifiez les permissions.', 'error');
-  }
+// Activer le clic de sélection d'image
+function triggerUpload(id) {
+  document.getElementById(id).click();
 }
 
-function captureSelfie() {
-  const video = document.getElementById('selfie-video');
-  const canvas = document.getElementById('selfie-canvas');
-  const preview = document.getElementById('selfie-preview');
-  const cameraView = document.getElementById('selfie-camera-view');
-  const selfieBox = document.getElementById('selfie-box');
-  const captureBtn = document.getElementById('btn-capture-selfie');
-  const retakeBtn = document.getElementById('btn-retake-selfie');
-
-  // Flash effect
-  const flash = document.createElement('div');
-  flash.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:white;opacity:0.85;z-index:9999;pointer-events:none;transition:opacity 0.3s';
-  document.body.appendChild(flash);
-  setTimeout(() => { flash.style.opacity = '0'; setTimeout(() => flash.remove(), 300); }, 80);
-
-  // Draw video frame on canvas (mirrored like the preview)
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  const ctx = canvas.getContext('2d');
-  ctx.translate(canvas.width, 0);
-  ctx.scale(-1, 1);
-  ctx.drawImage(video, 0, 0);
-
-  const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
-  imagesBase64.selfie = dataUrl;
-
-  // Stop camera stream
-  if (selfieStream) {
-    selfieStream.getTracks().forEach(t => t.stop());
-    selfieStream = null;
-  }
-
-  // Show preview
-  preview.src = dataUrl;
-  cameraView.style.display = 'none';
-  selfieBox.style.display = 'block';
-  selfieBox.classList.add('has-image');
-  captureBtn.style.display = 'none';
-  retakeBtn.style.display = 'block';
-
-  showToast('Selfie capturé !', 'success');
-  checkAndAutoVerify();
+// Aperçu des images téléchargées et encodage base64
+function previewImage(input, target) {
+  const file = input.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  
+  reader.onload = function(e) {
+    const preview = document.getElementById(`${target}-preview`);
+    const box = document.getElementById(`${target}-box`);
+    
+    preview.src = e.target.result;
+    box.classList.add('has-image');
+    imagesBase64[target] = e.target.result;
+    checkAndAutoVerify();
+  };
+  
+  reader.readAsDataURL(file);
 }
 
-function retakeSelfie() {
-  const selfieBox = document.getElementById('selfie-box');
-  const retakeBtn = document.getElementById('btn-retake-selfie');
-  const openBtn = document.getElementById('btn-open-camera');
 
-  imagesBase64.selfie = null;
-  selfieBox.style.display = 'none';
-  selfieBox.classList.remove('has-image');
-  retakeBtn.style.display = 'none';
-  openBtn.style.display = 'flex';
-  openBtn.disabled = false;
-  openBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg> Activer Caméra Frontale`;
-}
-
-// Vérification automatique dès que CNI + selfie sont prêts
+// Déclenchement automatique quand CNI + selfie sont prêts
 function checkAndAutoVerify() {
   if (imagesBase64.cni && imagesBase64.selfie) {
-    // Petit délai pour que l'UI se mette à jour visuellement
     setTimeout(() => startBiometricVerification(), 600);
   }
 }
-
 // Fonction de simulation biométrique avec logs animés
 function startBiometricVerification() {
   if (!imagesBase64.cni || !imagesBase64.selfie) {
@@ -307,10 +246,7 @@ function startBiometricVerification() {
       localStorage.setItem('user', JSON.stringify(currentUser));
       
       document.getElementById('verify-results').style.display = 'block';
-
-      // Animation dynamique du statut DGSN
       animateDgsnStatus();
-
       showToast('Identité validée à 100% avec succès !', 'success');
       
     } catch (err) {
@@ -321,45 +257,218 @@ function startBiometricVerification() {
   }, 6000);
 }
 
-// Démarrer le flux d'inscription et rediriger
+// Terminer le flux d'inscription et rediriger
 function finishVerificationFlow() {
   window.location.href = '/index.html';
 }
 
-// Animation dynamique du statut DGSN
-function animateDgsnStatus() {
-  const badge = document.getElementById('dgsn-status-badge');
-  const pulse = document.getElementById('dgsn-pulse');
-  const text = document.getElementById('dgsn-status-text');
+// --- SYSTEME DE GEOLOCALISATION AUTO & REVERSE GEOCODING ---
 
-  if (!badge || !text) return;
+function enableManualLocationInput() {
+  const villeInput = document.getElementById('reg-ville');
+  const quartierInput = document.getElementById('reg-quartier');
+  
+  villeInput.removeAttribute('readonly');
+  villeInput.style.cursor = 'text';
+  villeInput.style.background = 'transparent';
+  
+  quartierInput.removeAttribute('readonly');
+  quartierInput.style.cursor = 'text';
+  quartierInput.style.background = 'transparent';
+  
+  showToast('Saisie manuelle activée.', 'success');
+}
+
+async function detectUserLocation() {
+  const loader = document.getElementById('geoloc-loader');
+  const status = document.getElementById('geoloc-status');
+  
+  if (!loader || !status) return;
+
+  loader.style.display = 'flex';
+  status.innerText = 'Détermination des coordonnées GPS...';
+
+  // Options GPS
+  const options = {
+    enableHighAccuracy: true,
+    timeout: 5000,
+    maximumAge: 0
+  };
+
+  if (!navigator.geolocation) {
+    status.innerText = 'Géolocalisation non supportée par votre navigateur.';
+    loader.style.display = 'none';
+    enableManualLocationInput();
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    async (position) => {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+      
+      document.getElementById('reg-lat').value = lat;
+      document.getElementById('reg-lng').value = lng;
+      
+      status.innerText = `GPS trouvé (${lat.toFixed(4)}, ${lng.toFixed(4)}). Recherche de la ville au Cameroun...`;
+
+      try {
+        // Reverse geocoding via OpenStreetMap Nominatim
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
+          {
+            headers: {
+              'Accept-Language': 'fr' // Obtenir les noms en français
+            }
+          }
+        );
+        
+        if (!response.ok) throw new Error('Erreur Nominatim');
+        
+        const data = await response.json();
+        const addr = data.address || {};
+        
+        // Déterminer la ville
+        const ville = addr.city || addr.town || addr.village || addr.municipality || addr.county || addr.state || 'Douala';
+        // Déterminer le quartier
+        const quartier = addr.suburb || addr.neighbourhood || addr.quarter || addr.residential || addr.city_district || 'Akwa';
+        
+        document.getElementById('reg-ville').value = ville;
+        document.getElementById('reg-quartier').value = quartier;
+        
+        status.innerHTML = `✅ Localisation réussie : <strong>${quartier}, ${ville}</strong>`;
+        showToast(`Position détectée : ${quartier}, ${ville}`, 'success');
+      } catch (err) {
+        console.error('Erreur reverse geocoding:', err.message);
+        status.innerText = 'Coordonnées GPS obtenues, mais impossible de décoder l\'adresse. Saisie manuelle requise.';
+        enableManualLocationInput();
+      } finally {
+        loader.style.display = 'none';
+      }
+    },
+    (error) => {
+      console.warn('Erreur GPS code:', error.code, error.message);
+      status.innerText = 'Accès GPS refusé ou indisponible. Veuillez renseigner manuellement.';
+      loader.style.display = 'none';
+      
+      // Fallbacks par défaut (Yaoundé / Douala)
+      document.getElementById('reg-lat').value = '4.0511';
+      document.getElementById('reg-lng').value = '9.7679';
+      document.getElementById('reg-ville').value = 'Douala';
+      document.getElementById('reg-quartier').value = 'Akwa';
+      
+      enableManualLocationInput();
+    },
+    options
+  );
+}
+
+
+// ── CAMÉRA FRONTALE SELFIE ────────────────────────────────────────────────
+let selfieStream = null;
+
+async function openFrontCamera() {
+  const btn = document.getElementById('btn-open-camera');
+  const captureBtn = document.getElementById('btn-capture-selfie');
+  const cameraView = document.getElementById('selfie-camera-view');
+  const video = document.getElementById('selfie-video');
+
+  btn.disabled = true;
+  btn.classList.add('btn-loading');
+
+  try {
+    selfieStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
+      audio: false
+    });
+    video.srcObject = selfieStream;
+    cameraView.style.display = 'block';
+    btn.style.display = 'none';
+    btn.classList.remove('btn-loading');
+    captureBtn.style.display = 'flex';
+    showToast('Caméra frontale activée !', 'success');
+  } catch (err) {
+    btn.disabled = false;
+    btn.classList.remove('btn-loading');
+    showToast('Accès caméra refusé. Vérifiez les permissions.', 'error');
+  }
+}
+
+function captureSelfie() {
+  const video    = document.getElementById('selfie-video');
+  const canvas   = document.getElementById('selfie-canvas');
+  const preview  = document.getElementById('selfie-preview');
+  const cameraView  = document.getElementById('selfie-camera-view');
+  const selfieBox   = document.getElementById('selfie-box');
+  const captureBtn  = document.getElementById('btn-capture-selfie');
+  const retakeBtn   = document.getElementById('btn-retake-selfie');
+
+  // Flash blanc
+  const flash = document.createElement('div');
+  flash.style.cssText = 'position:fixed;inset:0;background:#fff;opacity:0.8;z-index:9999;pointer-events:none;transition:opacity 0.3s';
+  document.body.appendChild(flash);
+  setTimeout(() => { flash.style.opacity = '0'; setTimeout(() => flash.remove(), 300); }, 80);
+
+  canvas.width  = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.translate(canvas.width, 0);
+  ctx.scale(-1, 1);
+  ctx.drawImage(video, 0, 0);
+
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+  imagesBase64.selfie = dataUrl;
+
+  if (selfieStream) { selfieStream.getTracks().forEach(t => t.stop()); selfieStream = null; }
+
+  preview.src = dataUrl;
+  cameraView.style.display = 'none';
+  selfieBox.style.display  = 'block';
+  selfieBox.classList.add('has-image');
+  captureBtn.style.display = 'none';
+  retakeBtn.style.display  = 'block';
+
+  showToast('Selfie capturé !', 'success');
+  checkAndAutoVerify();
+}
+
+function retakeSelfie() {
+  imagesBase64.selfie = null;
+  document.getElementById('selfie-box').style.display   = 'none';
+  document.getElementById('selfie-box').classList.remove('has-image');
+  document.getElementById('btn-retake-selfie').style.display = 'none';
+  const openBtn = document.getElementById('btn-open-camera');
+  openBtn.style.display = 'flex';
+  openBtn.disabled = false;
+}
+
+// ── STATUT DGSN ANIMÉ ─────────────────────────────────────────────────────
+function animateDgsnStatus() {
+  const pulse = document.getElementById('dgsn-pulse');
+  const text  = document.getElementById('dgsn-status-text');
+  const badge = document.getElementById('dgsn-status-badge');
+  if (!text) return;
 
   const steps = [
-    { label: 'CONNEXION...', color: 'var(--secondary)', pulseColor: '#eab308' },
-    { label: 'AUTHENTIFICATION...', color: 'var(--secondary)', pulseColor: '#eab308' },
-    { label: 'VÉRIFICATION...', color: '#60a5fa', pulseColor: '#60a5fa' },
-    { label: 'VALIDATION...', color: '#a78bfa', pulseColor: '#a78bfa' },
-    { label: '✔ VERIFIED', color: 'var(--primary)', pulseColor: '#22c55e', final: true },
+    { label: 'CONNEXION...',      color: '#eab308', pulseColor: '#eab308' },
+    { label: 'AUTHENTIFICATION...', color: '#eab308', pulseColor: '#eab308' },
+    { label: 'VÉRIFICATION...',   color: '#60a5fa', pulseColor: '#60a5fa' },
+    { label: 'VALIDATION...',     color: '#a78bfa', pulseColor: '#a78bfa' },
+    { label: '✔ VERIFIED',        color: 'var(--primary)', pulseColor: '#22c55e', final: true },
   ];
 
   let i = 0;
-  const interval = setInterval(() => {
-    if (i >= steps.length) {
-      clearInterval(interval);
-      return;
-    }
-    const step = steps[i];
-    text.style.color = step.color;
-    text.innerText = step.label;
-    pulse.style.background = step.pulseColor;
-    pulse.style.boxShadow = `0 0 0 0 ${step.pulseColor}66`;
-
-    if (step.final) {
-      clearInterval(interval);
-      pulse.style.animation = 'none';
-      // Pop animation sur le badge
-      badge.style.animation = 'dgsn-verified-pop 0.45s cubic-bezier(0.22,1,0.36,1) forwards';
-      text.style.fontWeight = '900';
+  const iv = setInterval(() => {
+    if (i >= steps.length) { clearInterval(iv); return; }
+    const s = steps[i];
+    text.style.color = s.color;
+    text.innerText   = s.label;
+    if (pulse) { pulse.style.background = s.pulseColor; }
+    if (s.final) {
+      clearInterval(iv);
+      if (pulse) pulse.style.animation = 'none';
+      if (badge) badge.style.animation = 'dgsn-verified-pop 0.45s cubic-bezier(0.22,1,0.36,1) forwards';
+      text.style.fontWeight   = '900';
       text.style.letterSpacing = '2px';
     }
     i++;
