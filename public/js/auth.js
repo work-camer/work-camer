@@ -235,12 +235,12 @@ function startBiometricVerification() {
       finalEl.className = 'step-log-item done';
       finalEl.innerHTML = `<span>✅</span> Similarité faciale confirmée !`;
       
-      // Afficher les résultats extraits
+      
       document.getElementById('res-cni').innerText = data.extractedData.cniNumber;
       document.getElementById('res-nom').innerText = `${data.extractedData.prenomExtrait} ${data.extractedData.nomExtrait}`;
       document.getElementById('res-score').innerText = `${data.extractedData.faceMatchScore}%`;
       
-      // Mettre à jour l'utilisateur localement
+      
       const currentUser = getUser();
       currentUser.cniStatus = 'Verified';
       localStorage.setItem('user', JSON.stringify(currentUser));
@@ -338,6 +338,20 @@ async function detectUserLocation() {
         
         status.innerHTML = `✅ Localisation réussie : <strong>${quartier}, ${ville}</strong>`;
         showToast(`Position détectée : ${quartier}, ${ville}`, 'success');
+        
+        const banner = document.getElementById('gps-required-banner');
+        if (banner) {
+          banner.style.background = 'rgba(34, 197, 94, 0.1)';
+          banner.style.borderColor = 'rgba(34, 197, 94, 0.25)';
+          banner.style.color = 'var(--primary)';
+          banner.innerHTML = `
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+            Localisation précise activée et vérifiée.
+          `;
+        }
       } catch (err) {
         console.error('Erreur reverse geocoding:', err.message);
         status.innerText = 'Coordonnées GPS obtenues, mais impossible de décoder l\'adresse. Saisie manuelle requise.';
@@ -351,7 +365,6 @@ async function detectUserLocation() {
       status.innerText = 'Accès GPS refusé ou indisponible. Veuillez renseigner manuellement.';
       loader.style.display = 'none';
       
-      // Fallbacks par défaut (Yaoundé / Douala)
       document.getElementById('reg-lat').value = '4.0511';
       document.getElementById('reg-lng').value = '9.7679';
       document.getElementById('reg-ville').value = 'Douala';
@@ -363,8 +376,6 @@ async function detectUserLocation() {
   );
 }
 
-
-// ── CAMÉRA FRONTALE SELFIE ────────────────────────────────────────────────
 let selfieStream = null;
 
 async function openFrontCamera() {

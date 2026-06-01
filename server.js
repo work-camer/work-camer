@@ -37,11 +37,14 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Servir les fichiers statiques du front-end
 app.use(express.static(path.join(__dirname, 'public')));
 
+const dashboardRoutes = require('./routes/dashboardRoutes');
+
 // Enregistrer les routes API
 app.use('/api/auth', authRoutes);
 app.use('/api/jobs', jobRoutes);
 app.use('/api/applications', applicationRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Rediriger toutes les autres requêtes vers la page d'accueil
 app.get('{*path}', (req, res) => {

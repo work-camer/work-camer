@@ -802,8 +802,18 @@
                 data.discussions ?? 0;
               document.getElementById("stat-count-tertiary").textContent =
                 data.notifications ?? 0;
+                
+              const notifList = document.getElementById("notifications-list");
+              if (data.notificationsList && data.notificationsList.length > 0) {
+                notifList.innerHTML = data.notificationsList.map(n => `
+                  <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-glass);padding:0.75rem;border-radius:var(--radius-sm);margin-bottom:0.5rem;font-size:0.85rem">
+                    <div style="color:var(--text-secondary);font-size:0.75rem;margin-bottom:0.25rem">${new Date(n.date).toLocaleDateString('fr-FR', {hour: '2-digit', minute:'2-digit'})}</div>
+                    <div>${n.text}</div>
+                  </div>
+                `).join("");
+              }
             })
-            .catch((err) => {});
+            .catch((err) => { console.error('Erreur stats:', err); });
 
           // Fetch active chats
           apiCall("/messages/active/chats")
