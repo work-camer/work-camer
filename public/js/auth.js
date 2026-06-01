@@ -280,8 +280,8 @@ function enableManualLocationInput() {
 }
 
 async function detectUserLocation() {
-  const loader = document.getElementById('geoloc-loader');
-  const status = document.getElementById('geoloc-status');
+  const loader = document.getElementById('gps-status');
+  const status = document.getElementById('gps-status-text');
   
   if (!loader || !status) return;
 
