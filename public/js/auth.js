@@ -1,4 +1,4 @@
-// Mode de page par défaut ou dynamique via URL query params
+
 document.addEventListener('DOMContentLoaded', () => {
   const urlParams = new URLSearchParams(window.location.search);
   const mode = urlParams.get('mode');
@@ -19,7 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// Basculer l'affichage Connexion / Inscription
 let _currentMode = 'login';
 
 function toggleMode(mode) {
@@ -230,7 +229,6 @@ function startBiometricVerification() {
       document.getElementById('cni-box').classList.remove('scanning');
       document.getElementById('selfie-box').classList.remove('scanning');
       
-      // Mettre le dernier log en succès
       const finalEl = document.getElementById('log-5');
       finalEl.className = 'step-log-item done';
       finalEl.innerHTML = `<span>✅</span> Similarité faciale confirmée !`;
