@@ -197,6 +197,48 @@ exports.getMe = async (req, res) => {
   }
 };
 
+// @desc    Mettre à jour le profil de l'utilisateur
+// @route   PUT /api/auth/profile
+// @access  Private
+exports.updateProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Utilisateur introuvable' });
+    }
+
+    const { nom, prenom, email, telephone, type, ville, quartier, password } = req.body;
+
+    if (nom) user.nom = nom;
+    if (prenom) user.prenom = prenom;
+    if (email) user.email = email;
+    if (telephone) user.telephone = telephone;
+    if (type) user.type = type;
+    if (ville) user.geoloc.ville = ville;
+    if (quartier) user.geoloc.quartier = quartier;
+    if (password) user.password = password; // Sera crypté par le hook pre-save
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Profil mis à jour avec succès',
+      user: {
+        _id: user._id,
+        nom: user.nom,
+        prenom: user.prenom,
+        email: user.email,
+        telephone: user.telephone,
+        type: user.type,
+        cniStatus: user.cniStatus,
+        geoloc: user.geoloc
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 // @desc    Obtenir le profil d'un autre utilisateur (pour le chat)
 // @route   GET /api/auth/profile/:userId
 // @access  Private
