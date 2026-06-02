@@ -207,16 +207,14 @@ exports.updateProfile = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Utilisateur introuvable' });
     }
 
-    const { nom, prenom, email, telephone, type, ville, quartier, password } = req.body;
+    const { nom, prenom, telephone, ville, quartier, password } = req.body;
 
     if (nom) user.nom = nom;
     if (prenom) user.prenom = prenom;
-    if (email) user.email = email;
     if (telephone) user.telephone = telephone;
-    if (type) user.type = type;
     if (ville) user.geoloc.ville = ville;
     if (quartier) user.geoloc.quartier = quartier;
-    if (password) user.password = password; // Sera crypté par le hook pre-save
+    if (password) user.password = password;
 
     await user.save();
 
@@ -234,6 +232,39 @@ exports.updateProfile = async (req, res) => {
         geoloc: user.geoloc
       }
     });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Supprimer le compte de l'utilisateur connecté
+// @route   DELETE /api/auth/account
+// @access  Private
+exports.deleteAccount = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const Application = require('../models/Application');
+    const Job = require('../models/Job');
+    const Message = require('../models/Message');
+
+    // Supprimer les candidatures de l'utilisateur
+    await Application.deleteMany({ candidat: userId });
+
+    // Supprimer les candidatures sur les offres de l'utilisateur
+    const userJobs = await Job.find({ auteur: userId });
+    const jobIds = userJobs.map(j => j._id);
+    await Application.deleteMany({ job: { $in: jobIds } });
+
+    // Supprimer les offres publiées
+    await Job.deleteMany({ auteur: userId });
+
+    // Supprimer les messages
+    await Message.deleteMany({ $or: [{ expediteur: userId }, { destinataire: userId }] });
+
+    // Supprimer l'utilisateur
+    await User.findByIdAndDelete(userId);
+
+    res.status(200).json({ success: true, message: 'Votre compte a été supprimé définitivement.' });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
