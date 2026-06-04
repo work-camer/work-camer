@@ -115,13 +115,29 @@ async function loadMyOffers() {
         <td>${dateStr}</td>
         <td><span class="status-pill accepted">${job.statut}</span></td>
         <td>
-          <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;display:inline-flex;align-items:center;gap:4px" onclick="openApplicantsDrawer('${job._id}', '${job.titre.replace(/'/g, "\\'")}')">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> Voir les postulants
-          </button>
+          <div style="display:flex;gap:4px">
+            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;display:inline-flex;align-items:center;gap:4px" onclick="openApplicantsDrawer('${job._id}', '${job.titre.replace(/'/g, "\\'")}')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> Voir les postulants
+            </button>
+            <button class="btn btn-danger" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;display:inline-flex;align-items:center;gap:4px;background-color:var(--danger);color:white;" onclick="deleteJobOffer('${job._id}')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            </button>
+          </div>
         </td>
       `;
       tbody.appendChild(tr);
     });
+  } catch (error) {
+    showToast(error.message, 'error');
+  }
+}
+
+async function deleteJobOffer(jobId) {
+  if (!confirm('Voulez-vous vraiment supprimer cette offre ? Toutes les candidatures associées seront annulées.')) return;
+  try {
+    await apiCall(`/jobs/${jobId}`, { method: 'DELETE' });
+    showToast('Offre supprimée avec succès', 'success');
+    loadMyOffers();
   } catch (error) {
     showToast(error.message, 'error');
   }
@@ -287,12 +303,21 @@ async function loadMySubmissions() {
       const tr = document.createElement('tr');
       const rec = app.job.auteur;
       
-      let actionBtn = '-';
+      let actionBtn = `
+        <button class="btn btn-danger" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;display:inline-flex;align-items:center;gap:4px;background-color:var(--danger);color:white;" onclick="deleteMySubmission('${app._id}')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Retirer
+        </button>
+      `;
       if (app.statut === 'Accepté') {
         actionBtn = `
-          <button class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; background: var(--secondary); color: #000;display:inline-flex;align-items:center;gap:4px" onclick="startChat('${rec._id}')">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> Discuter
-          </button>
+          <div style="display:flex;gap:4px">
+            <button class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; background: var(--secondary); color: #000;display:inline-flex;align-items:center;gap:4px" onclick="startChat('${rec._id}')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> Discuter
+            </button>
+            <button class="btn btn-danger" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;display:inline-flex;align-items:center;gap:4px;background-color:var(--danger);color:white;" onclick="deleteMySubmission('${app._id}')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            </button>
+          </div>
         `;
       }
 
@@ -309,6 +334,17 @@ async function loadMySubmissions() {
       `;
       tbody.appendChild(tr);
     });
+  } catch (error) {
+    showToast(error.message, 'error');
+  }
+}
+
+async function deleteMySubmission(appId) {
+  if (!confirm('Voulez-vous vraiment annuler/retirer votre candidature ?')) return;
+  try {
+    await apiCall(`/applications/${appId}`, { method: 'DELETE' });
+    showToast('Candidature retirée avec succès', 'success');
+    loadMySubmissions();
   } catch (error) {
     showToast(error.message, 'error');
   }

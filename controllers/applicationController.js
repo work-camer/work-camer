@@ -146,3 +146,26 @@ exports.getMySubmissions = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// @desc    Supprimer/Annuler une candidature
+// @route   DELETE /api/applications/:id
+// @access  Private
+exports.deleteApplication = async (req, res) => {
+  try {
+    const application = await Application.findById(req.params.id);
+    if (!application) {
+      return res.status(404).json({ success: false, message: 'Candidature introuvable' });
+    }
+
+    // Vérifier si le candidat est bien l'utilisateur connecté
+    if (application.candidat.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Non autorisé à annuler cette candidature' });
+    }
+
+    await Application.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({ success: true, message: 'Candidature annulée avec succès' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

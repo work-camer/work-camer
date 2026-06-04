@@ -161,3 +161,31 @@ exports.updateJobStatus = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// @desc    Supprimer une offre d'emploi
+// @route   DELETE /api/jobs/:id
+// @access  Private
+exports.deleteJob = async (req, res) => {
+  try {
+    const job = await Job.findById(req.params.id);
+    if (!job) {
+      return res.status(404).json({ success: false, message: 'Offre introuvable' });
+    }
+    
+    // Vérifier si l'utilisateur est bien l'auteur du job
+    if (job.auteur.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Non autorisé à supprimer cette offre' });
+    }
+
+    // Supprimer les candidatures liées
+    const Application = require('../models/Application');
+    await Application.deleteMany({ job: req.params.id });
+
+    // Supprimer l'offre
+    await Job.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({ success: true, message: 'Offre supprimée avec succès' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
