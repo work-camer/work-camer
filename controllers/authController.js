@@ -173,6 +173,9 @@ exports.verifyCNI = async (req, res) => {
         const user = await User.findById(req.user._id);
         if (user) {
           user.cniStatus = 'Rejected';
+          if (!user.biometrics) {
+            user.biometrics = {};
+          }
           user.biometrics.rejectionReason = error.message;
           await user.save();
         }

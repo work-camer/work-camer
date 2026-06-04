@@ -31,8 +31,8 @@ const io = socketio(server, {
 });
 
 // Middleware Express
-app.use(express.json({ limit: '10mb' })); // Supporte les envois de photos base64
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '50mb' })); // Supporte les envois de photos base64 (CNI + selfie)
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Servir les fichiers statiques du front-end
 app.use(express.static(path.join(__dirname, 'public')));
